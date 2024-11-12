@@ -1,0 +1,54 @@
+function [Uadv_div_U_inf] = getUadv(States_OP,States_T,States_WF,paramFLORIS,D)
+%GETUADV Advection speed factor based on Zong & Porté-Agel 2020
+% Uadv(x) = 0.5*(U_inf + U_centre(x))
+%
+% Solved for Uadv(x)/U_inf:
+%   Uadv(x)/U_inf = sqrt(1-Ct cos(gamma)/(8(sig_y sig_z)/D^2))
+
+%% Parameters
+k_a     = paramFLORIS.k_a;
+k_b     = paramFLORIS.k_b;
+alpha   = paramFLORIS.alpha;
+beta    = paramFLORIS.beta;
+
+%% States
+C_T     = CalcCt(States_T(:,1),States_T(:,2));
+yaw     = -deg2rad(States_T(:,2));
+I       = sqrt(States_T(:,3).^2+States_WF(:,3).^2); % I_f & I_0
+OPdw    = States_OP(:,4);
+
+%% Calc x_0 (Core length)
+% [1] Eq. 7.3
+x_0 = (cos(yaw).*(1+sqrt(1-C_T))./...
+    (sqrt(2)*(alpha*I+beta*(1-sqrt(1-C_T))))).*D;
+
+%% Calc k_z and k_y based on I
+%[2] Eq.8
+k_y = k_a*I + k_b;
+k_z = k_y;
+
+%% Get field width y
+% [1] Eq. 7.2
+% To fit the field width, the value linearly increases from 0 to max for dw
+% positions before x_0
+zs = zeros(size(OPdw));
+sig_y_div_D = ...
+    max([OPdw-x_0,zs],[],2)   .* k_y/D +...
+    min([OPdw./x_0,zs+1],[],2).* cos(yaw)/sqrt(8);
+
+%% Get field width z
+% [1] Eq. 7.2
+sig_z_div_D = ...
+    max([OPdw-x_0,zs],[],2)    .* k_z/D +...
+    min([OPdw./x_0,zs+1],[],2) .* 1/sqrt(8);
+
+%% Calc advection speed ratio
+% U_adv(x) = 0.5*(U_inf + U_cen(x))
+% =>  U_adv(x)/U_inf = 0.5*(1 + U_cen/U_inf)
+% S
+U_cen_div_U_inf = sqrt(1-(C_T.*cos(yaw))./(8.*sig_y_div_D.*sig_z_div_D));
+U_cen_div_U_inf(x_0>OPdw) = 
+Uadv_div_U_inf = .5 * (1 + U_cen_div_U_inf);
+
+end
+

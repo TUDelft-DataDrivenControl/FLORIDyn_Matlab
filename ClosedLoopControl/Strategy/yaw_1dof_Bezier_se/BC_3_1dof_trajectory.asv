@@ -1,0 +1,16 @@
+function [tr,gd] = BC_3_1dof_trajectory(t_n,x,gd,rn,cu,g0)
+%BC_3_1DOF_TRAJECTORY Derives the new trajectory based on the optimization
+%value and the current derivative
+arguments
+    t_n (:,1) double % Time series, has to be equal to/between 0 and 1
+    x   (1,:) double % Optimization var, has to be equal to/between 0 and 1
+    gd  (:,1) double % Normalised derivative (to time window of length 1)
+    rn  (1,1) double % Normalised rate limit (to time window of length 1)
+    cu  (1,1) double % Ratio of control update to time window of length 1
+    g0  (:,1) double = 0 % Current angle
+end
+
+g2 = bc_o1_to_g2(x, gd/3, rn);
+tr = bc_(tn,0,gamma_d/3,g2,g2)
+end
+

@@ -1,0 +1,123 @@
+function [Con, CLC] = controller(T, Wind, Sim, Con, Vis, paramFLORIDyn, paramFLORIS,CLC, SimTime)
+%CONTROLLER determines the control inputs for the near future and beyond.
+%   It utilizes a given cost-function to evaluate the 
+%% Bezier_yaw
+% This controller is based on Bezier-Curves, which allow a smooth
+% transition between distinct setpoints. These setpoints are subject to the
+% optimization.
+% Bezier-curves further allow the user to calculate the derivative over
+% time, which allows us to enforce a yaw-rate limit (or axial induction)
+
+%% Check if controller should be active
+if SimTime<CLC.Time.StartTime
+    return 
+end
+
+%% Task 1 
+% Calculate the normalised rate limit
+%   The rate limit for the normed space is calculated by multiplying the
+%   rad/s with the time window, which leads to rad/[-].
+rate_lim = CLC.Set.yawRateLimit * Sim.TimeStep * CLC.Con.horizon_action;
+%   In future versions of the code, one could also change the action time
+%   for each turbine, allowing for different action horizons.
+
+%% Generate input for turbines - Step 1 
+% Read starting point based on random input or previous step
+x0 = CLC.x0;
+
+% Constants
+% Time line (+1 to account for current time step)
+t_n = linspace(0,1,CLC.Con.horizon_action+1);
+t   = linspace(SimTime, SimTime + CLC.Con.horizon_action * Sim.TimeStep,...
+    CLC.Con.horizon_action+1);
+
+% Control Update ratio
+cu = CLC.Time.nS/CLC.Con.horizon_action;
+
+% Wind angle rate of change at the end of the time horizon
+wa = -(getWindDirT(Wind.Dir,1:T.nT,...
+    SimTime + CLC.Con.horizon_action * Sim.TimeStep - Sim.TimeStep) - ...
+    getWindDirT(Wind.Dir,1:T.nT,...
+    SimTime + CLC.Con.horizon_action * Sim.TimeStep + Sim.TimeStep))/...
+    (2 * Sim.TimeStep) * Sim.TimeStep * CLC.Con.horizon_action;
+
+wa = max(-rate_lim,min(rate_lim,wa));
+
+% ======================================================================= %
+% ================== Optimise the trajectories ========================== %
+%options = optimoptions('fmincon','Display','iter','MaxIterations',10);%,'Algorithm','sqp');
+options = optimoptions('fmincon','MaxIterations',10);%,'Algorithm','sqp');
+
+f = @(x) cost_function_wrapper(x,T,Wind,Sim,Con,Vis,paramFLORIDyn,...
+    paramFLORIS,CLC,rate_lim,SimTime,t_n,t,cu,wa);
+x = fmincon(f,x0,[],[],[],[],zeros(T.nT*2,1),ones(T.nT*2,1),[],options);
+% ======================================================================= %
+% MISSING: yaw rate enforcement
+% ======================================================================= %
+
+%% Plot random solution space
+debug = false;
+if debug
+    e1 = rand(size(x));
+    e1 = e1./sqrt(sum(e1.^2));
+    
+    E = null(e1');
+    e2 = E(:,1)./sqrt(sum(E(:,1).^2));
+    
+    e_steps = linspace(-.5,.5,11);
+    [E1,E2] = meshgrid(e_steps,e_steps);
+    J_E = zeros(size(E1));
+    for ie = 1:length(E1(:))
+        xe = E1(ie)*e1 + E2(ie)*e2 + x;%ones(size(x))*.5;
+        
+        if sum(or(xe>1,xe<0))>0
+            J_E(ie)=0; 
+        else
+            J_E(ie) = f(xe);
+        end
+    end
+    J_E(J_E==0)=nan;
+    figure
+    contourf(E1,E2,J_E,256,'EdgeColor','none')
+    hold on
+    scatter(0,0,20,"white",'filled');
+    hold off
+    axis equal
+    grid on
+    xlabel('e_1')
+    ylabel('e_2')
+    colormap(viridis(256))
+    
+    ax = gca;
+    ax.YColor = 'w';
+    ax.XColor = 'w';
+    ax.Color = 'k';
+end
+
+%% Store optimised trajectory in Con.YawData
+% Step 1 Generate the rajectory
+[tr, CLC.g0, CLC.gd] = BC_3_2dof_trajectory(t_n,x,CLC.gd,rate_lim,cu,wa,CLC.g0);
+CLC.x0 = x;
+Con.YawData = [t', tr;
+    SimTime+CLC.Con.horizon_prediction*Sim.TimeStep, tr(end,:) + ...
+    CLC.gd/(Sim.TimeStep * CLC.Con.horizon_action) *...
+    (CLC.Con.horizon_prediction-CLC.Con.horizon_action)*Sim.TimeStep];
+end
+
+function J = cost_function_wrapper(x,T,Wind,Sim,Con,Vis,paramFLORIDyn,...
+    paramFLORIS,CLC,rn,SimTime,t_n,t,cu,wa)
+
+% Correct start time
+Sim.StartTime = SimTime;
+Sim.nSimSteps = CLC.Con.horizon_prediction;
+
+% Step 1 Generate the rajectory
+[tr, ~, gd] = BC_3_2dof_trajectory(t_n,x,CLC.gd,rn,cu,wa,CLC.g0);
+
+Con.YawData = [t', tr;
+    SimTime+CLC.Con.horizon_prediction*Sim.TimeStep, tr(end,:) + ...
+    gd/(Sim.TimeStep * CLC.Con.horizon_action) *...
+    (CLC.Con.horizon_prediction-CLC.Con.horizon_action)*Sim.TimeStep];
+
+J = cost_function(T,Wind,Sim,Con,Vis,paramFLORIDyn,paramFLORIS);
+end

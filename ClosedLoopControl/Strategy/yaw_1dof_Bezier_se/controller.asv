@@ -1,0 +1,70 @@
+function Con = controller(T, Wind, Sim, Con, Vis, paramFLORIDyn, paramFLORIS,CLC, SimTime)
+%CONTROLLER determines the control inputs for the near future and beyond.
+%   It utilizes a given cost-function to evaluate the 
+%% Bezier_yaw
+% This controller is based on Bezier-Curves, which allow a smooth
+% transition between distinct setpoints. These setpoints are subject to the
+% optimization.
+% Bezier-curves further allow the user to calculate the derivative over
+% time, which allows us to enforce a yaw-rate limit (or axial induction)
+
+%% Task 1 
+% Calculate the normalised rate limit
+%   The rate limit for the normed space is calculated by multiplying the
+%   rad/s with the time window, which leads to rad/[-].
+rate_lim = CLC.Set.yawRateLimit * Sim.TimeStep * CLC.Con.horizon_action;
+%   In future versions of the code, one could also change the action time
+%   for each turbine, allowing for different action horizons.
+
+%% Generate input for turbines - Step 1 
+% Create initial seed: Read starting point
+%   TODO
+
+% Create initial seed: Random combination
+x0 = rand(T.nT,1);
+
+% Constants
+% Time line (+1 to account for current time step)
+t_n = linspace(0,1,CLC.Con.horizon_action+1);
+t   = linspace(SimTime, SimTime + CLC.Con.horizon_action * Sim.TimeStep,...
+    CLC.Con.horizon_action+1);
+
+% Control Update ratio
+cu = CLC.Time.nS/CLC.Con.horizon_action;
+
+% ======================================================================= %
+% ================== Optimise the trajectories ========================== %
+f = @(x) cost_function_wrapper(x,T,Wind,Sim,Con,Vis,paramFLORIDyn,...
+    paramFLORIS,CLC,rate_lim,SimTime,t_n,t,cu);
+x = fmincon(f,x0,[],[],[],[],zeros(T.nT,1),ones(T.nT,1));
+% ======================================================================= %
+% MISSING: yaw rate enforcement
+% ======================================================================= %
+
+%% Store optimised trajectory in Con.YawData
+% Step 1 Generate the rajectory
+[tr, CLC.g0, CLC.gd] = BC_3_1dof_trajectory(t_n,x,CLC.gd,rn,cu,CLC.g0);
+
+Con.YawData = [t', tr;
+    SimTime+CLC.Con.horizon_prediction*Sim.Sim.TimeStep, tr(end,:)];
+
+% Write the yaw trajectory into the control yaw array
+Con.YawData = [SimTime+t_o, yaw];
+
+end
+
+function J = cost_function_wrapper(x,T,Wind,Sim,Con,Vis,paramFLORIDyn,...
+    paramFLORIS,CLC,rn,SimTime,t_n,t,cu)
+
+% Correct start time
+Sim.StartTime = SimTime;
+Sim.nSimSteps = CLC.Con.horizon_prediction;
+
+% Step 1 Generate the rajectory
+[tr, ~, ~] = BC_3_1dof_trajectory(t_n,x,CLC.gd,rn,cu,CLC.g0);
+
+Con.YawData = [t', tr;
+    SimTime+CLC.Con.horizon_prediction*Sim.TimeStep, tr(end,:)];
+
+J = cost_function(T,Wind,Sim,Con,Vis,paramFLORIDyn,paramFLORIS);
+end
