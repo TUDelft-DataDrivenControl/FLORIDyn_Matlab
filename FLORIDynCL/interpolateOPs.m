@@ -1,3 +1,24 @@
+% Copyright (C) <2024>, M Becker
+%
+% List of the contributors to the development of FLORIDyn: see LICENSE file.
+% Description and complete License: see LICENSE file.
+	
+% This program (FLORIDyn) is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+
+% You should have received a copy of the GNU Affero General Public License
+% along with this program (see COPYING file).  If not, see <https://www.gnu.org/licenses/>.
+% ======================================================================= %
+% Updated: 16. Dez. 2024, M. Becker
+% ======================================================================= %
+
 function intOPs = interpolateOPs(T)% T.nT, T.StartI, T.dep, T.States_OP, T.posBase, T.nOP
 %INTERPOALTEOPS Interpolates the OPs at the closest location of the
 %turbines which are then used to set up the temporary wind farms.
@@ -31,21 +52,6 @@ for iT = 1:T.nT % Every turbine
                 StartI(iiaT)+T.nOP-1, 1];
         else
             %% use two closest OPs to interpolate influence
-%             indOP1 = i_min(1);
-%             indOP2 = i_min(2);
-%             d1 = dist(indOP1);
-%             d2 = dist(indOP2);
-%             r1 = d2/(d1+d2);
-%             r2 = d1/(d1+d2); 
-             %% TEST IN DESMOS AGAIN AND IN MATLAB :( negative d
-            % OP in chain (default)
-%             if dist(i_min1) <= dist(i_min - 1)
-%                 indOP1 = StartI(iiaT) - 1 + i_min;
-%                 indOP2 = StartI(iiaT) - 1 + i_min - 1;
-%             else
-%                 indOP1 = StartI(iiaT) - 1 + i_min;
-%                 indOP2 = StartI(iiaT) - 1 + i_min + 1;
-%             end
             indOP1 = StartI(iiaT) - 1 + i_min(1);
             indOP2 = StartI(iiaT) - 1 + i_min(2);
             % Relative Distance: d = -((b-a)⊤(a-c))/((b-a)⊤(b-a))

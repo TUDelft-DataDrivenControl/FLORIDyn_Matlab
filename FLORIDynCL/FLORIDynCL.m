@@ -1,3 +1,24 @@
+% Copyright (C) <2024>, M Becker
+%
+% List of the contributors to the development of FLORIDyn: see LICENSE file.
+% Description and complete License: see LICENSE file.
+	
+% This program (FLORIDyn) is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+
+% You should have received a copy of the GNU Affero General Public License
+% along with this program (see COPYING file).  If not, see <https://www.gnu.org/licenses/>.
+% ======================================================================= %
+% Updated: 16. Dez. 2024, M. Becker
+% ======================================================================= %
+
 function [T,Mt,Vis,Mint] = FLORIDynCL(T,Wind,Sim,Con,Vis,paramFLORIDyn,paramFLORIS)
 %FLORIDYNCL Summary of this function goes here
 %   
@@ -30,7 +51,6 @@ Vis.StoreFlowField.OP       = false;
 Vis.FlowField.Plot.parallel = true;
 
 SimTime = Sim.StartTime;
-Vis.CL.Store = false; % <======================================== FOR ACC!!!
 for it = 1:Sim.nSimSteps
     Sim.SimStep = it;
     % ========== PREDICTION ==========
@@ -64,8 +84,7 @@ for it = 1:Sim.nSimSteps
     
     % ========== Get Control settings
     % Yaw is read in orientation angles
-    %T.States_T(T.StartI,1) = getAxInd(Con.YawData,(1:T.nT)',SimTime);
-    %T.States_T(:,2) = 0; % Forces Yaw to 0 deg
+    %T.States_T(T.StartI,1) = getAxInd(Con.YawData,(1:T.nT)',SimTime);     % PLACEHOLDER for axial induction control 
     T.States_T(T.StartI,2) = (T.States_WF(T.StartI,2) - ...
         getYaw(Con.YawData,(1:T.nT)',SimTime)');
     
@@ -106,7 +125,7 @@ for it = 1:Sim.nSimSteps
     % ========== Increase time
     SimTime = SimTime + Sim.TimeStep;
     
-    % ==== Save Data for ACC2024 ====
+    % ==== Store the centerline data ====
     if Vis.CL.Store
         storeCLInfo(T,Sim,it);
     end
