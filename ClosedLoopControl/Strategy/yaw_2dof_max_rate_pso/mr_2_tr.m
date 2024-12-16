@@ -1,5 +1,26 @@
+% Copyright (C) <2024>, M Becker
+%
+% List of the contributors to the development of FLORIDyn: see LICENSE file.
+% Description and complete License: see LICENSE file.
+	
+% This program (FLORIDyn) is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+
+% You should have received a copy of the GNU Affero General Public License
+% along with this program (see COPYING file).  If not, see <https://www.gnu.org/licenses/>.
+% ======================================================================= %
+% Updated: 16. Dez. 2024, M. Becker
+% ======================================================================= %
+
 function [tr, g0] = mr_2_tr(tn, x, cu, rn, g0)
-%MR_1_TR Max-rate 1-dof yaw trajectory
+%MR_2_TR Max-rate 2-dof yaw trajectory
 arguments
     tn (:,1) double % Time series, has to be equal to/between 0 and 1
     x  (1,:) double % Optimization var, has to be equal to/between 0 and 1

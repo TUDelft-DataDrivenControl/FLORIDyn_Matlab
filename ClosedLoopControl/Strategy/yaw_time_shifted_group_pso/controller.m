@@ -1,12 +1,30 @@
+% Copyright (C) <2024>, M Becker
+%
+% List of the contributors to the development of FLORIDyn: see LICENSE file.
+% Description and complete License: see LICENSE file.
+	
+% This program (FLORIDyn) is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+
+% You should have received a copy of the GNU Affero General Public License
+% along with this program (see COPYING file).  If not, see <https://www.gnu.org/licenses/>.
+% ======================================================================= %
+% Updated: 16. Dez. 2024, M. Becker
+% ======================================================================= %
+
 function [Con, CLC] = controller(T, Wind, Sim, Con, Vis, paramFLORIDyn, paramFLORIS,CLC, SimTime)
 %CONTROLLER determines the control inputs for the near future and beyond.
 %   It utilizes a given cost-function to evaluate the 
-%% Bezier_yaw
-% This controller is based on Bezier-Curves, which allow a smooth
-% transition between distinct setpoints. These setpoints are subject to the
-% optimization.
-% Bezier-curves further allow the user to calculate the derivative over
-% time, which allows us to enforce a yaw-rate limit (or axial induction)
+%% Shifted controller
+% Controller aims for synchronization betweencontrol action and effect at
+% the downstream turbine.
 
 %% Check if controller should be active
 if SimTime<CLC.Time.StartTime

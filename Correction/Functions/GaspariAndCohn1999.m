@@ -1,3 +1,25 @@
+% Copyright (C) <2024>, M Becker
+%
+% List of the contributors to the development of FLORIDyn: see LICENSE file.
+% Description and complete License: see LICENSE file.
+	
+% This program (FLORIDyn) is free software: you can redistribute it and/or modify
+% it under the terms of the GNU Affero General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+
+% This program is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU Affero General Public License for more details.
+
+% You should have received a copy of the GNU Affero General Public License
+% along with this program (see COPYING file).  If not, see <https://www.gnu.org/licenses/>.
+% ======================================================================= %
+% Updated: 16. Dez. 2024, M. Becker
+% ======================================================================= %
+
+
 function cov = GaspariAndCohn1999(l,d)
 %GASPARIANDCOHN1999
 % "To achieve covariance localization by Schur product a function, ρ, 
@@ -12,18 +34,6 @@ function cov = GaspariAndCohn1999(l,d)
 % d = distance(s) to the measurement location
 % ======================================================================= %
 c = sqrt(10/3)*l;
-% cov2 = .5*(sign(d) - sign(d-c)).*(...
-%         - 1/4*(d./c).*(d./c).*(d./c).*(d./c).*(d./c) ...
-%         + 1/2*(d./c).*(d./c).*(d./c).*(d./c) ...
-%         + 5/8*(d./c).*(d./c).*(d./c) ...
-%         - 5/3*(d./c).*(d./c) + 1) ...
-%         + .5*(sign(d-c) - sign(d-2*c)).*(...
-%          1/12*(d./c).*(d./c).*(d./c).*(d./c).*(d./c) ...
-%         - 0.5*(d./c).*(d./c).*(d./c).*(d./c) ...
-%         + 5/8*(d./c).*(d./c).*(d./c) ...
-%         + 5/3*(d./c).*(d./c) ...
-%         - 5*(d./c) + 4 ...
-%         - 2/3*(c./d));
     
 cov = .5*(sign(d) - sign(d-c)).*(...
         (((-1/4*(d./c) + 1/2).*(d./c) + 5/8).*(d./c) - 5/3) ...

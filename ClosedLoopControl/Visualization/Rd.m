@@ -1,4 +1,4 @@
-function map = RdBu(N)
+function map = Rd(N)
 % Divergent dark Red-White- dark Blue colormap 
 % Data source:
 % http://www.ncl.ucar.edu/Document/Graphics/ColorTables/MPL_RdBu.shtml
