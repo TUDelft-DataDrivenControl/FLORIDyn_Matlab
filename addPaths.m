@@ -3,7 +3,7 @@
 restoredefaultpath;
 clear RESTOREDEFAULTPATH_EXECUTED
 
-disp(['Current folder:' pwd])
+%disp(['Current folder:' pwd])
 % Add basic paths
 addpath(genpath(['.' filesep 'Visualization']));
 addpath(['.' filesep 'FLORIDynCL']);

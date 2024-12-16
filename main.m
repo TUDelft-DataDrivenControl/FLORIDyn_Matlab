@@ -1,7 +1,7 @@
 %% MainFLORIDyn Center-Line model
 % Improved FLORIDyn approach over the gaussian FLORIDyn model
 % Link folder with simulation data
-pathToSimulation = ['2024_CLC' filesep '2T_cost_function_study'];%'2021_9T_Data'; %'2023_NAWEA_2T_yaw_steering';%'2021_3T_Case_yaw_ConstWind';%['2024_CLC' filesep '10T_HKN_C1_201deg']; %
+pathToSimulation = '2021_9T_Data';
 
 %% Load data from the simulation
 % Reset the Matlab Path and load essential paths & the simulation path
@@ -9,8 +9,6 @@ addPaths;
 
 % Get the settings for the wind field, visualization, controller and Sim.
 [Wind, Vis, Sim, Con] = setup();
-
-%Sim.EndTime = Overwrite_EndTime; % <- Reclict from NAWEA 2023 runs
 
 % Add according functions to the search path
 addFLORISPaths;

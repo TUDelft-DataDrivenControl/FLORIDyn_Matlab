@@ -16,7 +16,6 @@ else
 end
 
 % Move them according to yaw and nacelle location of the last turbine
-%tmp_yaw = yawWord2effYaw(States_T(end,2),States_WF(end,2));
 tmp_yaw = deg2rad(States_T(end,2));
 % Rotation matrix based on yaw angle
 R       = [cos(tmp_yaw),sin(tmp_yaw),0; -sin(tmp_yaw),cos(tmp_yaw),0;0,0,1];
@@ -78,7 +77,6 @@ for iT = 1:(length(D)-1)
     
     % Turbine states (iT)
     a   = States_T(iT,1);
-    %yaw = yawWord2effYaw(States_T(iT,2),States_WF(iT,2));
     yaw = -deg2rad(States_T(iT,2));
     TI  = States_T(iT,3);
     Ct  = CalcCt(a,States_T(iT,2));
@@ -98,7 +96,6 @@ for iT = 1:(length(D)-1)
         r_cw < sqrt((0.5*pc_y.*cos(phi_cw)).^2 + ...
         (0.5*pc_z.*sin(phi_cw)).^2), ...
         tmp_RPs(:,1)==0);
-    %r_cw < abs(cos(phi_cw)).*pc_y*0.5 + abs(sin(phi_cw)).*pc_z*0.5,...
     nw = tmp_RPs(:,1)<x_0;
     
     % Calculate reduction r
@@ -117,16 +114,12 @@ for iT = 1:(length(D)-1)
     gaussWght(~core) = ...
         exp(-0.5.*((cw_y(~core)-cos(phi_cw(~core)).*pc_y(~core)*0.5)./sig_y(~core)).^2).*...
         exp(-0.5.*((cw_z(~core)-sin(phi_cw(~core)).*pc_z(~core)*0.5)./sig_z(~core)).^2);
-    tmp_RPs_r(~core) = gaussAbs(~core).*gaussWght(~core);%...
-        %exp(-0.5.*((cw_y(~core)-cos(phi_cw(~core)).*pc_y(~core)*0.5)./sig_y(~core)).^2).*...
-        %exp(-0.5.*((cw_z(~core)-sin(phi_cw(~core)).*pc_z(~core)*0.5)./sig_z(~core)).^2);
-    
+    tmp_RPs_r(~core) = gaussAbs(~core).*gaussWght(~core);
+
     T_weight(iT) = sum(gaussWght);
-    %redShear = getWindShearT(WindShear,RPl(:,3)/LocationT(iT,3));
-    
+
     % Combine reductions
-    %T_red = T_red*(1-RPw'*(tmp_RPs_r.*redShear));
-    T_red_arr(iT) = (1-RPw'*(tmp_RPs_r));%*RPw'*redShear;
+    T_red_arr(iT) = (1-RPw'*(tmp_RPs_r));
     
     % Added turbulence levels (squares summed)
     %   Calculate influence
@@ -135,7 +128,7 @@ for iT = 1:(length(D)-1)
         a.^paramFLORIS.k_fb .* ...
         TI0.^paramFLORIS.k_fc .* ...
         (mean(tmp_RPs(:,1))./D(iT)).^paramFLORIS.k_fd)...
-        );%.^2;                                             % <===== CHANGED
+        );
     %   Weight influence
     %   cw_y: y crosswind distance of the RPs to the deflected centreline
     %   pc_y: y crosswind width of the potential core (Only relevant in
@@ -146,17 +139,11 @@ for iT = 1:(length(D)-1)
         exp(-0.5.*((cw_z-sin(phi_cw).*pc_z*0.5)./...
         (paramFLORIS.TIexp*sig_z)).^2));
     
-%T_addedTI = T_addedTI + T_addedTI_tmp * RPw'* ...
-%         0.5*(sign(tmp_RPs(:,2) + 3*D(iT))...%mean(3*sig_y+pc_y/2))...
-%         -sign(tmp_RPs(:,2) - 3*D(iT))); %mean(3*sig_y+pc_y/2)));
-    
 end
 redShear = getWindShearT(WindShear,RPl(:,3)/LocationT(iT,3));
 T_red_arr(end) = RPw'*redShear;
 
 T_red       = prod(T_red_arr);
-% T_addedTI   = sum(T_aTI_arr);
-% T_addedTI   = sqrt(T_addedTI);
 T_Ueff      = States_WF(end,1)*T_red;
 end
 
