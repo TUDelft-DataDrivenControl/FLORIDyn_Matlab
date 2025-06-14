@@ -103,6 +103,10 @@ rmpath('./WindField/Direction_EnKF_InterpTurbine');
 % @test phi[1] ≈ 24.92903352636283
 % @test phi[2] ≈ 24.363944731838128
 
+addpath('./WindField/Direction_Interpolation_wErrorCov');
+
+
+rmpath('./WindField/Direction_Interpolation_wErrorCov');
 
 disp('All tests passed.');
 
