@@ -67,6 +67,15 @@ rmpath('./WindField/Direction_Constant')
 
 clear all
 addpath('./WindField/Direction_EnKF_InterpTurbine');
+WindDir = [
+    0.0  10.0  20.0
+    1.0  12.0  22.0
+    2.0  14.0  24.0
+];
+phi = getWindDirT_EnKF(WindDir, 1, 0.5);
+assert(abs(phi - 11.0) < 1e-8, 'Test failed');
+
+rmpath('./WindField/Direction_EnKF_InterpTurbine');
 
 disp('All tests passed.');
 
