@@ -74,8 +74,35 @@ WindDir = [
 ];
 phi = getWindDirT_EnKF(WindDir, 1, 0.5);
 assert(abs(phi - 11.0) < 1e-8, 'Test failed');
-
 rmpath('./WindField/Direction_EnKF_InterpTurbine');
+
+% dir_mode = Direction_Interpolation_wErrorCov()
+% 
+% # Example wind direction data (time, phi)
+% wind_data = [
+%     0.0  10.0;
+%     5.0  20.0;
+%     10.0 30.0
+% ]
+% 
+% # Example Cholesky factor (for 2 turbines)
+% chol_sig = cholesky([1.0 0.5; 0.5 1.0]).L
+% 
+% # Create WindDir instance
+% WindDir = WindDirMatrix(wind_data, chol_sig)
+% 
+% # Example turbine indices (for 2 turbines)
+% iT = [1, 2]
+% 
+% # Example time
+% t = 7.0
+% 
+% # Call the function
+% phi = getWindDirT(dir_mode, WindDir, iT, t)
+% @test size(phi) == (2,1)
+% @test phi[1] ≈ 24.92903352636283
+% @test phi[2] ≈ 24.363944731838128
+
 
 disp('All tests passed.');
 
