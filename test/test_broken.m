@@ -15,7 +15,7 @@
 % The following test (Matlab version) fails. It returns an array instead of
 % a vector.
 clear all
-addpath('./WindField/Direction_Constant_wErrorCov');
+addpath('../WindField/Direction_Constant_wErrorCov');
 rng(1234);
 
 % Cholesky factor of 3x3 identity
@@ -34,5 +34,5 @@ phi = getWindDirT(WindDir, iT)
 % for i = 1:length(phi)
 %     assert(abs(phi(i) - result(i)) < 1e-8, 'Test failed at index %d', i);
 % end
-rmpath('./WindField/Direction_Constant_wErrorCov');
+rmpath('../WindField/Direction_Constant_wErrorCov');
 
