@@ -32,28 +32,27 @@ rmpath('./WindField/Direction_Constant')
 %         @test ph ≈ result[i]
 %     end
 
-% % The following test fails
-% % clear all
-% % addpath('./WindField/Direction_Constant_wErrorCov');
-% % rng(1234);
-% % 
-% % % Cholesky factor of 3x3 identity
-% % L = chol(eye(3), 'lower');
-% % 
-% % % WindDir structure
-% % WindDir.Data = 270.0;
-% % WindDir.CholSig = L;
-% % 
-% % iT = [1, 2, 3];
-% % 
-% % % Expected result
-% % result = [269.6402710931765, 271.0872084924286, 269.5804103830612];
-% % 
-% % phi = getWindDirT(WindDir, iT);
-% % for i = 1:length(phi)
-% %     assert(abs(phi(i) - result(i)) < 1e-8, 'Test failed at index %d', i);
-% % end
-% % rmpath('./WindField/Direction_Constant_wErrorCov');
+clear all
+addpath('./WindField/Direction_Constant_wErrorCov');
+rng(1234);
+
+% Cholesky factor of 3x3 identity
+L = chol(eye(3), 'lower');
+
+% WindDir structure
+WindDir.Data = 270.0;
+WindDir.CholSig = L;
+
+iT = [1, 2, 3]';
+
+% Expected result
+result = [269.0527533560426, 270.54014974707036, 269.78339785902375];
+
+phi = getWindDirT(WindDir, iT);
+for i = 1:length(phi)
+    assert(abs(phi(i) - result(i)) < 1e-8, 'Test failed at index %d', i);
+end
+rmpath('./WindField/Direction_Constant_wErrorCov');
 
 % %   dir_mode = Direction_EnKF_InterpTurbine()
 %   # Suppose WindDir is a matrix where each row is [time, phi_T0, phi_T1, ...]
