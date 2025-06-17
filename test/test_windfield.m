@@ -54,7 +54,7 @@ for i = 1:length(phi)
 end
 rmpath('./WindField/Direction_Constant_wErrorCov');
 
-% %   dir_mode = Direction_EnKF_InterpTurbine()
+%   dir_mode = Direction_EnKF_InterpTurbine()
 %   # Suppose WindDir is a matrix where each row is [time, phi_T0, phi_T1, ...]
 %     WindDir = [
 %         0.0  10.0  20.0
