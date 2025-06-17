@@ -102,8 +102,33 @@ rmpath('./WindField/Direction_EnKF_InterpTurbine');
 % @test phi[1] ≈ 24.92903352636283
 % @test phi[2] ≈ 24.363944731838128
 
+clear all
 addpath('./WindField/Direction_Interpolation_wErrorCov');
 
+% Wind direction data: [time, direction]
+wind_data = [
+    0.0, 10.0;
+    5.0, 20.0;
+    10.0, 30.0
+];
+
+% Cholesky factor (lower triangular)
+chol_sig = chol([1.0 0.5; 0.5 1.0], 'lower');
+
+% Structure to hold data
+WindDir.Data = wind_data;
+WindDir.CholSig = chol_sig;
+
+% Turbine indices and time
+iT = [1, 2]';
+t = 7.0;
+
+phi = getWindDirT(WindDir, iT, t);
+
+% Test
+assert(isequal(size(phi), [2,1]));
+assert(abs(phi(1) - 25.84752589085377) < 1e-6);
+assert(abs(phi(2) - 25.140544918823198128) < 1e-6);
 
 rmpath('./WindField/Direction_Interpolation_wErrorCov');
 
