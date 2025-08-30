@@ -20,8 +20,9 @@
 % ======================================================================= %
 
 %% MainFLORIDyn Center-Line model
-% Improved FLORIDyn approach over the gaussian FLORIDyn model
+% % Improved FLORIDyn approach over the gaussian FLORIDyn model
 % Link folder with simulation data
+tic()
 pathToSimulation = '2021_9T_Data';
 
 %% Load data from the simulation
@@ -48,47 +49,55 @@ clear turbProp
 %% ====== Init simulation
 % Run initial conditions until no more change happens
 T = initSimulation(T,Wind,Sim,Con,Vis,paramFLORIDyn,paramFLORIS);
-
+Vis.FlowField.Plot.Online = false;
 %% ============ RUN SIMULATION ============
 % T := Simulation state (OP states, Turbine states, wind field states(OPs))
 % M := Measurements from the simulation (T_red, T_addedTI, T_Ueff, T_pow)
+toc()
 tic
+% Sim.EndTime = 20000;
+Sim.nSimSteps = 2;
+
+filename = "after_init_simulation_T.mat";
+save(filename, 'T');
+display("Saved: "+filename);
+
 [T,M,Vis,Mint] = FLORIDynCL(T,Wind,Sim,Con,Vis,paramFLORIDyn,paramFLORIS);
 t = toc;
 disp(['Sec. per sim. step: ' num2str(t/Sim.nSimSteps) ' with '...
     num2str(T.nT) ' turbine(s), total sim. time: ' num2str(t) ' s.'])
 %% Plotting & visualization
 
-% Measurements
-if Vis.Msmnts.Output
-    PlotMeasurements(T,M,Wind,Sim,Vis,paramFLORIDyn,paramFLORIS);
-    pause(0.1)
-end
+% % Measurements
+% if Vis.Msmnts.Output
+%     PlotMeasurements(T,M,Wind,Sim,Vis,paramFLORIDyn,paramFLORIS);
+%     pause(0.1)
+% end
 
 % Flow Field
 if Vis.FlowField.Plot.Post
-    PlotFlowField(T,M,Wind,Sim,Vis,paramFLORIDyn,paramFLORIS)
-    pause(0.1)
+    PlotFlowField(T,M,Wind,Sim,Vis,paramFLORIDyn,paramFLORIS);
+    pause(0.1);
 end
 
-% 3D Flow Field (.vtk for ParaView)
-if Vis.FlowField3D.Generate
-    gen3DFlowField(T,M,Wind,Sim,Vis,paramFLORIDyn,paramFLORIS);
-end
+% % 3D Flow Field (.vtk for ParaView)
+% if Vis.FlowField3D.Generate
+%     gen3DFlowField(T,M,Wind,Sim,Vis,paramFLORIDyn,paramFLORIS);
+% end
 
-% Final state to skip initialization
-if Sim.SaveFinalState
-    save([Sim.PathToSim 'T_final.mat'],'T')
-end
-
-% Save movie if online plotting was activated
-if Vis.FlowField.Plot.Online
-    Vis.Film.InProgress = false;
-    % Write saved frames as a movie to the simulation folder
-    v = VideoWriter(Vis.Film.MovFileEffU);
-    v.FrameRate = 20;
-    v.Quality   = 100;
-    open(v)
-    writeVideo(v,Vis.Film.FrmFileEffU)
-    close(v)
-end
+% % Final state to skip initialization
+% if Sim.SaveFinalState
+%     save([Sim.PathToSim 'T_final.mat'],'T')
+% end
+% 
+% % Save movie if online plotting was activated
+% if Vis.FlowField.Plot.Online
+%     Vis.Film.InProgress = false;
+%     % Write saved frames as a movie to the simulation folder
+%     v = VideoWriter(Vis.Film.MovFileEffU);
+%     v.FrameRate = 20;
+%     v.Quality   = 100;
+%     open(v)
+%     writeVideo(v,Vis.Film.FrmFileEffU)
+%     close(v)
+% end
