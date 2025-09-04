@@ -31,6 +31,7 @@ addPaths;
 
 % Get the settings for the wind field, visualization, controller and Sim.
 [Wind, Vis, Sim, Con] = setup();
+% Sim.Dyn.OPiteration='IterateOPs_average';
 
 % Add according functions to the search path
 addFLORISPaths;
