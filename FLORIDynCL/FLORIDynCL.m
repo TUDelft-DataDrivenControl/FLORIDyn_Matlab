@@ -53,6 +53,9 @@ Vis.FlowField.Plot.parallel = true;
 SimTime = Sim.StartTime;
 for it = 1:Sim.nSimSteps
     Sim.SimStep = it;
+    turbulence = T.States_T(201, 3);
+    display("Info: 1: "+turbulence);
+
     % ========== PREDICTION ==========
     % Iterate OPs and states
     T = iterateOPs(T,Sim,paramFLORIS,paramFLORIDyn);
@@ -68,11 +71,23 @@ for it = 1:Sim.nSimSteps
     T.intOPs = interpolateOPs(T);
     
     %   ======= Set up temp Wind farms & run FLORIS
+    if it == 2
+        filename = "input_setUpTmpWFAndRun_"+Sim.nSimSteps+"_steps.mat";
+        save(filename, 'T', 'paramFLORIS', 'Wind');
+        display("Saved: "+filename);
+    end
     [tmpM,T] = setUpTmpWFAndRun(T,paramFLORIS,Wind);
+    turbulence = T.States_T(201, 3);
+    display("Info: 4: "+turbulence);
+
     M((it-1)*T.nT+1:it*T.nT,2:4)    = tmpM;
     M((it-1)*T.nT+1:it*T.nT,1)      = SimTime;
     T.States_T(T.StartI,3)          = tmpM(:,2);
     M_int{it}                       = T.red_arr;
+    turbulence = T.States_T(201, 3);
+    format long e
+    display(tmpM(:,2));
+    display("Info: 5: "+turbulence);
     
     % ========== Get Wind field variables & correct values
     [T,Wind] = correctVel(T,Wind,SimTime,paramFLORIS,tmpM);
