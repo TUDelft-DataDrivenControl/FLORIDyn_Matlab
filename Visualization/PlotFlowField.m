@@ -22,6 +22,11 @@
 function [Vis] = PlotFlowField(T,~,Wind,Sim,Vis,paramFLORIDyn,paramFLORIS,SimTime)
 %PLOTFLOWFIELD Generate full flow field plot
 % exportgraphics(gcf,'9T_flow.pdf','ContentType','vector')
+
+filename = "input_T_"+Sim.nSimSteps+"_steps.mat";
+save(filename, 'T');
+display("Saved: "+filename);
+
 %% Preallocate field
 nM = countMeasurements(Vis.FlowField.Data);
 nM = 3;
@@ -41,6 +46,14 @@ if Vis.FlowField.Plot.parallel
 else
     Z = getMeasurements(X,Y,nM,T.posNac(1,3),T,paramFLORIS,Wind,Vis);
 end
+
+out = "v_min: " + min(min(Z(:,:,3)));
+out = sprintf('%s\n', out);
+out = out + "v_max: " + max(max(Z(:,:,3)));
+display(out);
+filename = "flowfield_xyz_"+Sim.nSimSteps+"_steps.mat";
+save(filename, 'X', 'Y', 'Z');
+display("Saved: "+filename);
 
 %% Generate & save plots
 % figure
